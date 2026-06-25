@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<posts>
+    <post>
+        <title>First post title - this is a sample tweet</title>
+        <url>https://example.com/article-1</url>
+    </post>
+    <post>
+        <title>Second post about technology trends</title>
+        <url>https://example.com/article-2</url>
+    </post>
+    <post>
+        <title>Third post sharing interesting insights</title>
+        <url>https://example.com/article-3</url>
+    </post>
+    <post>
+        <title>Fourth post with valuable content</title>
+        <url>https://example.com/article-4</url>
+    </post>
+    <post>
+        <title>Fifth post for testing automation</title>
+        <url>https://example.com/article-5</url>
+    </post>
+</posts>

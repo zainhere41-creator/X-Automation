@@ -1,0 +1,14 @@
+{
+  "name": "x-posting-automation",
+  "version": "1.0.0",
+  "description": "X (Twitter) posting automation across multiple Chrome profiles",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+    "electron": "^35.0.0"
+  },
+  "author": "",
+  "license": "MIT"
+}

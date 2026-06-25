@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Electron
+electron/dist/
+electron/out/
+
+# Data
+data/*.db
+data/*.db-journal
+
+# Logs
+logs/*.log
+logs/*.png
+
+# Profiles (user data)
+profiles/
+
+# Temp
+temp/
+tmp/
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

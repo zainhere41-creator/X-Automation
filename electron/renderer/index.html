@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>X Posting Automation</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar">
+      <button class="nav-btn active" data-tab="main" title="Main Dashboard">
+        <span>📊</span>
+      </button>
+      <button class="nav-btn" data-tab="campaigns" title="Campaigns Detail">
+        <span>📋</span>
+      </button>
+      <button class="nav-btn" data-tab="advanced" title="Advanced Settings">
+        <span>⚙️</span>
+      </button>
+      <button class="nav-btn" data-tab="setup" title="Setup">
+        <span>🔧</span>
+      </button>
+      <button class="nav-btn hidden" data-tab="review" title="Review Campaign" id="nav-review">
+        <span>✓</span>
+      </button>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="content">
+      <!-- TAB 1: MAIN DASHBOARD -->
+      <div class="tab-content active" id="tab-main">
+        <!-- Status Bar -->
+        <div class="status-bar">
+          <div class="status-item">
+            <span class="status-label">Backend:</span>
+            <span class="status-dot" id="backend-status"></span>
+            <span id="backend-status-text">Connecting...</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Scheduler:</span>
+            <span id="scheduler-status">Stopped</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Next Run:</span>
+            <span id="next-run-timer">--</span>
+          </div>
+        </div>
+
+        <!-- Campaign Grid -->
+        <div class="section">
+          <h2>Campaigns</h2>
+          <div class="campaign-grid" id="campaign-grid">
+            <div class="empty-message">No campaigns active</div>
+          </div>
+        </div>
+
+        <!-- Control Buttons -->
+        <div class="section">
+          <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <label for="sheets-per-run" style="font-weight: 600; white-space: nowrap;">Sheets Per Run:</label>
+              <input type="number" id="sheets-per-run" value="1" min="1" style="width: 60px; padding: 0.4rem; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-primary); color: var(--text-primary); text-align: center;">
+            </div>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">How many sheets to complete per cycle (e.g. 2 = finish Sheet 1 completely, then Sheet 2)</span>
+          </div>
+          <div class="button-row">
+            <button class="btn btn-primary" id="btn-launch-profiles">Launch Profiles</button>
+            <button class="btn btn-info" id="btn-detect-profiles" title="Detect profiles that are already running">🔍 Detect Running</button>
+            <button class="btn btn-success" id="btn-start-automation">Start Automation</button>
+            <button class="btn btn-danger" id="btn-stop-automation">Stop Automation</button>
+            <button class="btn btn-warning" id="btn-shutdown-profiles">Shutdown Profiles</button>
+          </div>
+          <div class="button-row" style="margin-top: 1rem;">
+            <button class="btn btn-run-now" id="btn-run-now">▶ Run Now (Manual Post)</button>
+            <button class="btn btn-secondary" id="btn-run-now-help" title="Troubleshooting Guide">❓ Help</button>
+          </div>
+        </div>
+
+        <!-- Queue Stats -->
+        <div class="section">
+          <h2>Queue Status</h2>
+          <div class="stats-row">
+            <div class="stat-badge stat-sheets">
+              <span class="stat-value" id="stat-sheets">0/0</span>
+              <span class="stat-label">Sheets</span>
+            </div>
+            <div class="stat-badge stat-posts">
+              <span class="stat-value" id="stat-total">0</span>
+              <span class="stat-label">Posts</span>
+            </div>
+            <div class="stat-badge stat-done">
+              <span class="stat-value" id="stat-done">0</span>
+              <span class="stat-label">Done</span>
+            </div>
+            <div class="stat-badge stat-pending">
+              <span class="stat-value" id="stat-pending">0</span>
+              <span class="stat-label">Pending</span>
+            </div>
+            <div class="stat-badge stat-failed">
+              <span class="stat-value" id="stat-failed">0</span>
+              <span class="stat-label">Failed</span>
+            </div>
+          </div>
+          <div id="sheet-tracking-info" class="tab-tracking-info hidden"></div>
+        </div>
+
+        <!-- Live Logs -->
+        <div class="section">
+          <h2>Live Logs</h2>
+          <div class="log-panel" id="log-panel"></div>
+        </div>
+      </div>
+
+      <!-- TAB 2: CAMPAIGNS DETAIL -->
+      <div class="tab-content" id="tab-campaigns">
+        <div class="campaigns-header">
+          <h1>Campaign Details</h1>
+          <button class="btn btn-secondary" id="btn-refresh-campaigns">🔄 Refresh</button>
+        </div>
+
+        <div class="campaigns-container" id="campaigns-container">
+          <div class="empty-message">No campaigns to display</div>
+        </div>
+      </div>
+
+      <!-- TAB 3: ADVANCED SETTINGS -->
+      <div class="tab-content" id="tab-advanced">
+        <h1>Advanced Settings</h1>
+
+        <!-- Scheduler Mode -->
+        <div class="settings-section">
+          <h3>Scheduler Mode</h3>
+          <div class="radio-group">
+            <label>
+              <input type="radio" name="schedule-mode" value="interval" checked>
+              <span>Interval Mode</span>
+            </label>
+            <div class="mode-config" id="interval-config">
+              <label>Every 
+                <input type="number" id="interval-minutes" value="30" min="1" max="1440">
+                minutes
+              </label>
+            </div>
+          </div>
+
+          <div class="radio-group">
+            <label>
+              <input type="radio" name="schedule-mode" value="fixed">
+              <span>Fixed Times Mode</span>
+            </label>
+            <div class="mode-config hidden" id="fixed-config">
+              <label>Times (HH:MM, comma-separated):
+                <input type="text" id="fixed-times" placeholder="09:00, 14:00, 20:00">
+              </label>
+            </div>
+          </div>
+
+          <div class="radio-group">
+            <label>
+              <input type="radio" name="schedule-mode" value="random">
+              <span>Random Delay Mode</span>
+            </label>
+            <div class="mode-config hidden" id="random-config">
+              <label>Between 
+                <input type="number" id="random-min" value="20" min="1" max="120">
+                and 
+                <input type="number" id="random-max" value="60" min="1" max="240">
+                minutes
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Concurrency -->
+        <div class="settings-section">
+          <h3>Concurrency</h3>
+          <div class="slider-control">
+            <input type="range" id="concurrency-slider" min="1" max="30" value="2">
+            <span id="concurrency-value">2</span>
+          </div>
+          <p class="help-text">1 = safe sequential  |  5 = balanced  |  10+ = fast (higher risk)</p>
+          <div class="warning-banner hidden" id="concurrency-warning">
+            ⚠ High concurrency increases detection risk
+          </div>
+        </div>
+
+        <!-- Post Behavior -->
+        <div class="settings-section">
+          <h3>Post Behavior</h3>
+          <div class="form-row">
+            <label>Typing delay (ms):
+              <input type="number" id="typing-delay-min" value="80" min="10" max="500">
+              to
+              <input type="number" id="typing-delay-max" value="180" min="10" max="500">
+            </label>
+          </div>
+          <div class="form-row">
+            <label>Pause between posts (seconds):
+              <input type="number" id="post-delay-min" value="3" min="0" max="60">
+              to
+              <input type="number" id="post-delay-max" value="8" min="0" max="300">
+            </label>
+          </div>
+          <div class="form-row">
+            <label>Delay before clicking Post (seconds):
+              <input type="number" id="pre-submit-delay-min" value="1.0" min="0" max="30" step="0.1">
+              to
+              <input type="number" id="pre-submit-delay-max" value="2.0" min="0" max="30" step="0.1">
+            </label>
+          </div>
+          <div class="form-row">
+            <label>Dots after title:
+              <select id="title-dots-count" style="padding: 0.4rem; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-primary); color: var(--text-primary);">
+                <option value="2">2 dots (...)</option>
+                <option value="3">3 dots (....)</option>
+              </select>
+            </label>
+          </div>
+          <div class="form-row">
+            <label>Cycle cooldown (minutes):
+              <input type="number" id="cycle-cooldown" value="30" min="0">
+            </label>
+          </div>
+        </div>
+
+        <!-- Base Port -->
+        <div class="settings-section">
+          <h3>Base Port</h3>
+          <div class="form-row">
+            <label>CDP Debugging Port:
+              <input type="number" id="base-port" value="9222" min="1024" max="65535">
+            </label>
+            <p class="help-text">Change only if ports are in use. Restart required.</p>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="settings-actions">
+          <button class="btn btn-primary" id="btn-save-settings">Save Settings</button>
+          <button class="btn" id="btn-reset-settings">Reset to Defaults</button>
+        </div>
+      </div>
+
+      <!-- TAB 4: SETUP -->
+      <div class="tab-content" id="tab-setup">
+        <h1>Setup</h1>
+
+        <!-- Step 1: Profiles Folder -->
+        <div class="setup-section">
+          <h3>Step 1: Accounts Folder</h3>
+          <p class="help-text">Each subfolder should contain one Chrome shortcut (.lnk) file</p>
+          <div class="folder-input">
+            <input type="text" id="profiles-folder-input" placeholder="Select accounts folder..." readonly>
+            <button class="btn" id="btn-browse-profiles">Browse</button>
+          </div>
+          <div class="setup-result hidden" id="profiles-result"></div>
+        </div>
+
+        <!-- Step 2: Post Data (XLSX) -->
+        <div class="setup-section">
+          <h3>Step 2: Post Data (Excel File)</h3>
+          
+          <!-- XLSX Input -->
+          <div class="data-input" id="xlsx-input-section">
+            <div class="folder-input">
+              <input type="text" id="xlsx-file-input" placeholder="Select Excel file..." readonly>
+              <button class="btn" id="btn-browse-xlsx">Browse XLSX</button>
+            </div>
+            <div class="setup-result hidden" id="xlsx-result"></div>
+            <p class="help-text">Each sheet = one scheduled run. Each row = one post. Columns: title | url | community</p>
+          </div>
+          
+          <!-- Preview Table -->
+          <div class="preview-table hidden" id="preview-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Sheet</th>
+                  <th>Posts</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="preview-tbody"></tbody>
+            </table>
+          </div>
+          
+          <!-- XLSX Info -->
+          <div class="xlsx-info hidden" id="xlsx-info">
+            <div class="info-box">
+              <span class="info-icon">📊</span>
+              <span id="xlsx-runs-count">0</span> runs/tabs detected
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2b: Load More Files (shown after first file loaded) -->
+        <div class="setup-section hidden" id="section-append">
+          <h3>Load More Posts</h3>
+          <p class="help-text">Append posts from additional XLSX files to your queue</p>
+          
+          <div class="append-toggle" style="margin: 0.75rem 0;">
+            <label class="toggle-label">
+              <input type="checkbox" id="append-mode-toggle" checked>
+              <span>Append mode (add to existing queue)</span>
+            </label>
+          </div>
+          
+          <div class="button-row">
+            <button class="btn" id="btn-load-another-xlsx">+ Load Another XLSX</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Continue to Review -->
+        <div class="setup-section hidden" id="section-continue">
+          <h3>Step 3: Continue to Review</h3>
+          <p class="help-text">Review your campaign configuration before saving</p>
+          
+          <div class="button-row" style="margin-top: 1.5rem;">
+            <button class="btn btn-primary btn-large" id="btn-continue">Continue →</button>
+          </div>
+        </div>
+
+        <!-- Step 4: Queue Management -->
+        <div class="setup-section">
+          <h3>Queue Management</h3>
+          <button class="btn btn-warning" id="btn-reset-queue">Reset Queue</button>
+          <p class="help-text">Clear all tasks and reload from file</p>
+          <div class="stats-row" style="margin-top: 1rem;">
+            <div class="stat-badge">
+              <span class="stat-value" id="setup-stat-total">0</span>
+              <span class="stat-label">Total</span>
+            </div>
+            <div class="stat-badge stat-pending">
+              <span class="stat-value" id="setup-stat-pending">0</span>
+              <span class="stat-label">Pending</span>
+            </div>
+            <div class="stat-badge stat-done">
+              <span class="stat-value" id="setup-stat-done">0</span>
+              <span class="stat-label">Done</span>
+            </div>
+            <div class="stat-badge stat-failed">
+              <span class="stat-value" id="setup-stat-failed">0</span>
+              <span class="stat-label">Failed</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 5: REVIEW -->
+      <div class="tab-content" id="tab-review">
+        <h1>Review Campaign Configuration</h1>
+        
+        <!-- Campaign Overview -->
+        <div class="review-section">
+          <h2>📊 Campaign Overview</h2>
+          <div class="review-card">
+            <div class="review-item">
+              <span class="review-label">Campaign Name:</span>
+              <input type="text" id="campaign-name-input" placeholder="My Campaign" class="campaign-name-input">
+            </div>
+            <div class="review-item">
+              <span class="review-label">Data Source:</span>
+              <span class="review-value" id="review-data-source">--</span>
+            </div>
+            <div class="review-item">
+              <span class="review-label">Total Posts:</span>
+              <span class="review-value" id="review-total-posts">0</span>
+            </div>
+            <div class="review-item">
+              <span class="review-label">Total Profiles:</span>
+              <span class="review-value" id="review-total-profiles">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profiles Assignment -->
+        <div class="review-section">
+          <h2>👥 Profiles & Port Assignment</h2>
+          <p class="help-text">Each profile will be assigned a unique debugging port</p>
+          <div class="profiles-review-grid" id="profiles-review-grid">
+            <!-- Profile cards will be inserted here -->
+          </div>
+        </div>
+
+        <!-- Posts Preview -->
+        <div class="review-section">
+          <h2>📝 Posts Preview</h2>
+          <p class="help-text">Posts that will be assigned to profiles</p>
+          <div class="posts-review-list" id="posts-review-list">
+            <!-- Post items will be inserted here -->
+          </div>
+        </div>
+
+        <!-- Scheduling Configuration -->
+        <div class="review-section">
+          <h2>⏰ Scheduling Configuration</h2>
+          <div class="review-card">
+            <div class="review-item">
+              <span class="review-label">Schedule Mode:</span>
+              <span class="review-value" id="review-schedule-mode">--</span>
+            </div>
+            <div class="review-item">
+              <span class="review-label">Interval:</span>
+              <span class="review-value" id="review-interval">--</span>
+            </div>
+            <div class="review-item">
+              <span class="review-label">Concurrency:</span>
+              <span class="review-value" id="review-concurrency">--</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="review-actions">
+          <button class="btn" id="btn-back-to-setup">← Back to Setup</button>
+          <button class="btn btn-success btn-large" id="btn-save-campaign">💾 Save Campaign</button>
+        </div>
+
+        <!-- What's Next Info -->
+        <div class="info-banner">
+          <h3>📌 What's Next After Saving:</h3>
+          <ol class="next-steps-list">
+            <li><strong>Launch Profiles:</strong> Click "Launch Profiles" button to open Chrome windows</li>
+            <li><strong>Log In:</strong> Manually log into X/Twitter in each Chrome window</li>
+            <li><strong>Start Automation:</strong> Click "Start Automation" to begin scheduled posting</li>
+            <li><strong>Monitor:</strong> Watch Live Logs and Queue Status on the main dashboard</li>
+          </ol>
+        </div>
+        <div id="tab-tracking-info" class="tab-tracking-info hidden"></div>
+      </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<posts>
+    <!-- Example post with community tagging -->
+    <post>
+        <title>Watch Full Video - Amazing tutorial on web development!</title>
+        <url>https://example.com/tutorial-1</url>
+        <community_url>https://twitter.com/i/communities/1570853436589051907</community_url>
+    </post>
+    
+    <!-- Example post with community tagging -->
+    <post>
+        <title>Check out this awesome resource for developers</title>
+        <url>https://example.com/resource-1</url>
+        <community_url>https://twitter.com/i/communities/1570853436589051907</community_url>
+    </post>
+    
+    <!-- Example post without community (regular tweet) -->
+    <post>
+        <title>Just sharing some thoughts on coding best practices</title>
+        <url>https://example.com/blog-post</url>
+    </post>
+    
+    <!-- Example post with community tagging -->
+    <post>
+        <title>New video tutorial is live! Learn Python in 30 minutes</title>
+        <url>https://youtube.com/watch?v=example</url>
+        <community_url>https://twitter.com/i/communities/1570853436589051907</community_url>
+    </post>
+</posts>

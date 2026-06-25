@@ -1,0 +1,18 @@
+{
+  "concurrency": 2,
+  "post_delay_min": 3,
+  "post_delay_max": 8,
+  "cycle_cooldown": 30,
+  "base_port": 9222,
+  "typing_delay_min": 80,
+  "typing_delay_max": 180,
+  "schedule_mode": "interval",
+  "interval_minutes": 30,
+  "fixed_times": [],
+  "random_min_minutes": 20,
+  "random_max_minutes": 60,
+  "sheets_per_run": 1,
+  "pre_submit_delay_min": 1.0,
+  "pre_submit_delay_max": 2.0,
+  "title_dots_count": 2
+}
